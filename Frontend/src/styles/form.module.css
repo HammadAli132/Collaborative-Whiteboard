@@ -71,8 +71,8 @@
     cursor: pointer;
     align-self: flex-end;
     transition: all .3s;
-}
-
+  }
+  
 .btn:hover {
     background-color: #7b4cf0;
 }

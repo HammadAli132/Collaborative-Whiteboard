@@ -1,6 +1,9 @@
 import styles from "../../styles/form.module.css"
+import { useNavigate } from "react-router-dom"
 
 export default function CreateForm() {
+    const navigate = useNavigate()
+
     return (
         <div className={styles.formDiv}>
             <span className={styles.formTitle}>Create A Room</span>
@@ -13,7 +16,15 @@ export default function CreateForm() {
                     Room ID:
                     <input type="text" name="roomId" id="roomId" placeholder="Room ID" className={styles.input} />
                 </label>
-                <button type="submit" className={styles.btn}>Create Room</button>
+                <button type="submit" 
+                        className={styles.btn}
+                        onClick={(e) => {
+                            e.preventDefault()
+                            navigate('/homepage')
+                        }}
+                        >
+                    Create Room
+                </button>
             </form>
         </div>
     )

@@ -1,0 +1,72 @@
+#homepage {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 0 1rem;
+}
+
+#toolbar {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #3c3c3c;
+    border-radius: 8px;
+    box-shadow: 0 0 10px 2px #131313;
+    padding: 1rem;
+    position: relative;
+}
+
+#tools {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.tool {
+    height: 2.7rem;
+    width: 2.7rem;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all .3s;
+    cursor: pointer;
+}
+
+.tool:hover {
+    background-color: #3c3c3c;
+}
+
+#colorPicker {
+    height: 2.7rem;
+    width: 2.7rem;
+    border: 1px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#color {
+    width: 100%;
+    cursor: pointer;
+}
+
+#colors {
+    position: absolute;
+    bottom: -150px;
+    left: 100%;
+    margin-left: 1rem;
+    background-color: #3c3c3c;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;  /* Initially hidden */
+    max-height: 0;       /* Collapsed height initially */
+    overflow: hidden;    /* Prevent content from showing when collapsed */
+    transition: opacity 0.3s ease, max-height 0.3s ease, visibility 0.3s ease;
+}
+
+#colors.active {
+    opacity: 1;
+    visibility: visible;   /* Make it visible */
+    max-height: 500px;      /* Adjust this value depending on the height of your content */
+}

@@ -47,6 +47,12 @@ header {
   justify-content: center;
 }
 
+main {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
 footer {
   padding: 1rem 0;
   display: flex;

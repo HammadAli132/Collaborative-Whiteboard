@@ -4,10 +4,12 @@ import {CirclePicker} from "react-color"
 import pencil from "../../assets/pencil.svg"
 import eraser from "../../assets/eraser.svg"
 import rect from "../../assets/rect.svg"
-import { useState } from "react"
+import { useContext, useState } from "react"
+import { myContext } from "../../pages/Homepage"
 
-const Toolbar = ({mode, handleModes, color, handleColors}) => {
+const Toolbar = () => {
     const toolbarImages = [pencil, eraser, rect]
+    const {mode, setMode, color, setColor} = useContext(myContext)
     const [opened, setOpened] = useState(false)
 
     function handleOpening() {
@@ -22,7 +24,7 @@ const Toolbar = ({mode, handleModes, color, handleColors}) => {
                         return (
                             <li key={key}
                                 className={styles.tool}
-                                onClick={() => handleModes(index)}
+                                onClick={() => setMode(index)}
                                 style={{ backgroundColor: index === mode ? '#3c3c3c' : '' }}
                                 >
                                 <img src={toolbarImages[index]} alt="Error" />
@@ -45,7 +47,7 @@ const Toolbar = ({mode, handleModes, color, handleColors}) => {
                     ]}
                     onChangeComplete={(color) => {
                         handleOpening()
-                        handleColors(color.hex)
+                        setColor(color.hex)
                     }}
                 />
             </div>

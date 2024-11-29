@@ -121,12 +121,19 @@
     background-color: white;
 }
 
+canvas {
+    height: 100%;
+    width: 100%;
+    display: block;
+}
+
 #chatArea {
     height: 100%;
     width: 400px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-height: calc(100vh - (98px + 56px));
 }
 
 #areaTitle {
@@ -141,12 +148,19 @@
     height: 100%;
     border-radius: 8px;
     box-shadow: 0 0 10px 2px #131313;
+    overflow: hidden;
 }
 
 #chats {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
     overflow-y: auto;
-    flex-grow: 1;
     padding: .5rem;
+    height: 100%;
+    gap: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #703bf7 #3c3c3c;
 }
 
 #separator {
@@ -157,7 +171,7 @@
     margin-top: 1rem;
 }
 
-#message {
+#messageBox {
     font-size: 16px;
     padding: 0.7rem 1rem;
     outline: none;
@@ -165,4 +179,31 @@
     background-color: #3c3c3c;
     margin: 1rem;
     border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    background-color: #3c3c3c;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.block {
+    display: flex;
+    justify-content: space-between;
+}
+
+.username,
+.date {
+    font-size: 14px;
+    font-weight: 600;
+    color: #7b4cf0;
+}
+
+.messageText {
+    font-weight: 300;
+    width: 100%;
+    text-wrap: wrap;
 }

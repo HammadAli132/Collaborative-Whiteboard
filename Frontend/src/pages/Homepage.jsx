@@ -2,7 +2,7 @@ import { createContext, useState } from "react";
 import Toolbar from "../components/homepage/Toolbar";
 import styles from "../styles/homepage.module.css"
 import Canvas from "../components/homepage/Canvas";
-import ChatBox from "../components/homepage/ChatBox";
+import ChatBox from "../components/chat/ChatBox";
 
 export const myContext = createContext({
     mode: 0,

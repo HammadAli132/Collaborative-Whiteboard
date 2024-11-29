@@ -31,42 +31,54 @@ export default function Canvas() {
     }, []);
 
     // Redraw all paths (freehand and rectangles) on the canvas
-    const redrawCanvas = () => {
+    const redrawCanvas = (paths) => {
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
         context.clearRect(0, 0, canvas.width, canvas.height); // Clear the whole canvas
-        drawnPaths.forEach(path => {
-            if (path.type === "freehand") {
-                roughCanvasRef.current.linearPath(path.points, {
-                    stroke: path.color,
-                    strokeWidth: 4,
-                    roughness: 0,
-                });
-            } else if (path.type === "rectangle") {
-                roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
-                    stroke: path.color,
-                    strokeWidth: 2,
-                    roughness: 0,
-                });
-            }
-        });
+        if (paths)
+            paths.forEach(path => {
+                if (path.type === "freehand") {
+                    roughCanvasRef.current.linearPath(path.points, {
+                        stroke: path.color,
+                        strokeWidth: 4,
+                        roughness: 0,
+                    });
+                } else if (path.type === "rectangle") {
+                    roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
+                        stroke: path.color,
+                        strokeWidth: 2,
+                        roughness: 0,
+                    });
+                }
+            });
+        else
+            drawnPaths.forEach(path => {
+                if (path.type === "freehand") {
+                    roughCanvasRef.current.linearPath(path.points, {
+                        stroke: path.color,
+                        strokeWidth: 4,
+                        roughness: 0,
+                    });
+                } else if (path.type === "rectangle") {
+                    roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
+                        stroke: path.color,
+                        strokeWidth: 2,
+                        roughness: 0,
+                    });
+                }
+            });
     };
 
     const handleMouseDown = (e) => {
         const { offsetX, offsetY } = e.nativeEvent;
         setIsDrawing(true);
-        setStartPoint([offsetX, offsetY]);
-
-        if (mode !== 2) {
-            setPoints([[offsetX, offsetY]]); // Start free-drawing
-        }
+        mode === 2 ? setStartPoint([offsetX, offsetY]) : setPoints([[offsetX, offsetY]])
     };
 
     const handleMouseMove = (e) => {
         if (!isDrawing) return;
 
         const { offsetX, offsetY } = e.nativeEvent;
-
         if (mode === 2) {
             // Rectangle drawing logic
             const [startX, startY] = startPoint;
@@ -75,7 +87,7 @@ export default function Canvas() {
             setCurrentRect({ x: startX, y: startY, width, height });
 
             // Redraw canvas to preserve other paths and show live preview
-            redrawCanvas();
+            redrawCanvas(null);
 
             // Draw the preview rectangle
             roughCanvasRef.current.rectangle(startX, startY, width, height, {
@@ -86,7 +98,6 @@ export default function Canvas() {
         } else {
             setPoints((prev) => [...prev, [offsetX, offsetY]]);
             // Draw a freehand line
-            redrawCanvas(); // Redraw all paths
             roughCanvasRef.current.linearPath(points, {
                 stroke: mode === 0 ? color : "#ffffff",
                 strokeWidth: 4,
@@ -106,7 +117,11 @@ export default function Canvas() {
         }
 
         if (mode !== 2 && points.length > 1) {
-            const newPath = { type: "freehand", points, color };
+            let newPath = undefined
+            if (mode === 0) // if in pencil mode, the color is one present in context
+                newPath = { type: "freehand", points, color }
+            else if (mode === 1) // if in eraser mode, the color is white
+                newPath = { type: "freehand", points, color:"#ffffff" }
             setDrawnPaths((prev) => [...prev, newPath]);
             setUndoStack((prev) => [...prev, newPath]); // Save to undo stack
         }
@@ -130,10 +145,13 @@ export default function Canvas() {
         const lastAction = undoStack[undoStack.length - 1];
         setRedoStack((prev) => [lastAction, ...prev]); // Move to redo stack
         setUndoStack((prev) => prev.slice(0, prev.length - 1)); // Remove from undo stack
-
         // Redraw canvas after undo
-        setDrawnPaths(undoStack.slice(0, undoStack.length - 1)); // Update drawn paths
-        redrawCanvas();
+        setDrawnPaths((prev) => {
+            const updatedPaths = prev.slice(0, prev.length - 1);
+            console.log(`Updated path: ${JSON.stringify(updatedPaths)}`)
+            redrawCanvas(updatedPaths);
+            return updatedPaths;
+        });
     };
 
     const handleRedo = () => {
@@ -144,26 +162,21 @@ export default function Canvas() {
         setRedoStack((prev) => prev.slice(1)); // Remove from redo stack
 
         // Redraw canvas after redo
-        setDrawnPaths((prev) => [...prev, lastRedoAction]); // Add to drawn paths
-        redrawCanvas();
+        setDrawnPaths((prev) => {
+            const updatedPaths = [...prev, lastRedoAction];
+            redrawCanvas(updatedPaths);
+            return updatedPaths;
+        });
     };
 
     return (
         <div id={styles.canvas}>
             <div id={styles.topRow}>
                 <div className={styles.dos}>
-                    <img
-                        src={undo}
-                        alt="Undo"
-                        onClick={handleUndo}
-                    />
+                    <img src={undo} alt="Undo" onClick={handleUndo} />
                 </div>
                 <div className={styles.dos}>
-                    <img
-                        src={redo}
-                        alt="Redo"
-                        onClick={handleRedo}
-                    />
+                    <img src={redo} alt="Redo" onClick={handleRedo} />
                 </div>
                 <button className={styles.btn} onClick={handleClearCanvas}>Clear Board</button>
             </div>

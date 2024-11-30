@@ -18,10 +18,6 @@ const routes = [
             },
         ],
     },
-    // {
-    //     path: '/my-github',
-    //     element: <Navigate to='https://github.com/HammadAli132/' />,
-    // },
 ]
 
 export default routes

@@ -61,6 +61,13 @@
     outline: 1px solid #703bf7;
 }
 
+#btnDiv {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    align-self: flex-end;
+}
+
 .btn {
     margin-top: 1rem;
     background-color: #703bf7;
@@ -71,7 +78,24 @@
     cursor: pointer;
     align-self: flex-end;
     transition: all .3s;
-  }
+}
+
+#generatorBtn {
+    height: 2rem;
+    width: 2rem;
+    padding: 5px;
+    background-color: transparent;
+}
+
+#generatorBtn:hover {
+    background-color: #3c3c3c;
+}
+
+#generatorBtn img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
   
 .btn:hover {
     background-color: #7b4cf0;

@@ -1,6 +1,6 @@
 import styles from "../../styles/form.module.css"
 import rotate from "../../assets/rotate.svg"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useOutletContext } from "react-router-dom"
 import { useRef, useState } from "react"
 
 const generateID = () => {
@@ -18,12 +18,20 @@ export default function CreateForm() {
     const nameRef = useRef()
     const [roomID, setRoomID] = useState(generateID())
     const [username, setUsername] = useState(null)
+    const { setUser, socket } = useOutletContext()
 
     const handleRoomCreation = (e) => {
         e.preventDefault()
         if (username === null || username === '')
             alert('Kindly enter a username')
         else {
+            const data = {
+                roomID,
+                username,
+                userID: generateID(),
+            }
+            setUser(data)
+            socket.emit("owner-joined", data)
             navigate('/homepage')
         }
     }

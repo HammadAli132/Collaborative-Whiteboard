@@ -1,6 +1,16 @@
 import { useRef, useState } from "react"
 import styles from "../../styles/form.module.css"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useOutletContext } from "react-router-dom"
+
+const generateID = () => {
+    let randomID = ""
+    for (let i = 0; i < 4; i++) {
+        let randomNum = Math.floor(Math.random() * 255) + 1
+        randomID += randomNum.toString()
+        if (i < 3) randomID += '.'
+    }
+    return randomID
+}
 
 export default function JoinForm() {
     const navigate = useNavigate()
@@ -8,6 +18,23 @@ export default function JoinForm() {
     const roomIdRef = useRef()
     const [roomID, setRoomID] = useState(null)
     const [username, setUsername] = useState(null)
+    const { setUser, socket } = useOutletContext()
+
+    const handleRoomJoining = (e) => {
+        e.preventDefault()
+        if (username === null || username === '')
+            alert('Kindly enter a username')
+        else {
+            const data = {
+                roomID,
+                username,
+                userID: generateID(),
+            }
+            setUser(data)
+            socket.emit("user-joined", data)
+            navigate('/homepage')
+        }
+    }
 
     return (
         <div className={styles.formDiv}>
@@ -35,15 +62,7 @@ export default function JoinForm() {
                 </label>
                 <button type="submit" 
                         className={styles.btn}
-                        onClick={(e) => {
-                            e.preventDefault()
-                            if (username === null || username === '')
-                                alert('Kindly enter a username')
-                            else if (roomID === null || roomID === '')
-                                alert('Kindly enter a room ID')
-                            else 
-                                navigate('/homepage')
-                        }}
+                        onClick={handleRoomJoining}
                         >
                     Join Room
                 </button>

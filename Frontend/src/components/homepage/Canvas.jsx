@@ -4,18 +4,20 @@ import redo from "../../assets/redo.svg";
 import { useContext, useEffect, useRef, useState } from "react";
 import rough from "roughjs";
 import { myContext } from "../../pages/Homepage";
+import { useOutletContext } from "react-router-dom";
 
 export default function Canvas() {
-    const canvasRef = useRef(null);
-    const roughCanvasRef = useRef(null);
-    const [points, setPoints] = useState([]); // Free drawing points
-    const [startPoint, setStartPoint] = useState(null); // Rectangle start point
-    const [currentRect, setCurrentRect] = useState(null); // Rectangle preview
-    const [drawnPaths, setDrawnPaths] = useState([]); // All drawn paths
-    const [undoStack, setUndoStack] = useState([]); // Stack for undo actions
-    const [redoStack, setRedoStack] = useState([]); // Stack for redo actions
-    const [isDrawing, setIsDrawing] = useState(false);
-    const { mode, color } = useContext(myContext);
+    const canvasRef = useRef(null)
+    const roughCanvasRef = useRef(null)
+    const [points, setPoints] = useState([]) // Free drawing points
+    const [startPoint, setStartPoint] = useState(null) // Rectangle start point
+    const [currentRect, setCurrentRect] = useState(null) // Rectangle preview
+    const [drawnPaths, setDrawnPaths] = useState([]) // All drawn paths
+    const [undoStack, setUndoStack] = useState([]) // Stack for undo actions
+    const [redoStack, setRedoStack] = useState([]) // Stack for redo actions
+    const [isDrawing, setIsDrawing] = useState(false)
+    const { mode, color } = useContext(myContext)
+    const { socket } = useOutletContext()
 
     useEffect(() => {
         if (canvasRef.current) {
@@ -35,39 +37,52 @@ export default function Canvas() {
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
         context.clearRect(0, 0, canvas.width, canvas.height); // Clear the whole canvas
-        if (paths)
-            paths.forEach(path => {
-                if (path.type === "freehand") {
-                    roughCanvasRef.current.linearPath(path.points, {
-                        stroke: path.color,
-                        strokeWidth: 4,
-                        roughness: 0,
-                    });
-                } else if (path.type === "rectangle") {
-                    roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
-                        stroke: path.color,
-                        strokeWidth: 2,
-                        roughness: 0,
-                    });
-                }
-            });
-        else
-            drawnPaths.forEach(path => {
-                if (path.type === "freehand") {
-                    roughCanvasRef.current.linearPath(path.points, {
-                        stroke: path.color,
-                        strokeWidth: 4,
-                        roughness: 0,
-                    });
-                } else if (path.type === "rectangle") {
-                    roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
-                        stroke: path.color,
-                        strokeWidth: 2,
-                        roughness: 0,
-                    });
-                }
-            });
+        const drawings = paths || drawnPaths
+        drawings.forEach(path => {
+            if (path.type === "freehand") {
+                roughCanvasRef.current.linearPath(path.points, {
+                    stroke: path.color,
+                    strokeWidth: 4,
+                    roughness: 0,
+                });
+            } else if (path.type === "rectangle") {
+                roughCanvasRef.current.rectangle(path.x, path.y, path.width, path.height, {
+                    stroke: path.color,
+                    strokeWidth: 2,
+                    roughness: 0,
+                });
+            }
+        })
     };
+
+    useEffect(() => {
+        socket.on("draw", data => {
+            if (data.type === 'freehand') {
+                roughCanvasRef.current.linearPath(data.points, {
+                    stroke: data.color,
+                    strokeWidth: 4,
+                    roughness: 0,
+                });
+            }
+            else if (data.type === 'rectangle') {
+                roughCanvasRef.current.rectangle(data.x, data.y, data.width, data.height, {
+                    stroke: data.color,
+                    strokeWidth: 2,
+                    roughness: 0,
+                });
+            }
+        })
+
+        socket.on("save", data => {
+            setDrawnPaths((prev) => {
+                const updatedPaths = [...prev, data];
+                return updatedPaths;
+            });
+            setUndoStack((prev) => [...prev, data]) // Save to undo stack
+        })
+
+        socket.on("clear-canvas", handleClearCanvas)
+    }, [socket])
 
     const handleMouseDown = (e) => {
         const { offsetX, offsetY } = e.nativeEvent;
@@ -96,13 +111,18 @@ export default function Canvas() {
                 roughness: 0,
             });
         } else {
-            setPoints((prev) => [...prev, [offsetX, offsetY]]);
+            setPoints((prev) => [...prev, [offsetX, offsetY]])
+            socket.emit('draw', {
+                points,
+                color: mode === 0 ? color : "#ffffff",
+                type: 'freehand',
+            })
             // Draw a freehand line
             roughCanvasRef.current.linearPath(points, {
                 stroke: mode === 0 ? color : "#ffffff",
                 strokeWidth: 4,
                 roughness: 0,
-            });
+            })
         }
     };
 
@@ -111,6 +131,9 @@ export default function Canvas() {
             // Finalize rectangle drawing
             const { x, y, width, height } = currentRect;
             const newPath = { type: "rectangle", x, y, width, height, color };
+            // Sends the currentRect to be drawn on others screens
+            socket.emit('draw', {...currentRect, type: 'rectangle', color})
+            socket.emit('save', newPath) // to save it in others drawnPaths as well
             setDrawnPaths((prev) => [...prev, newPath]);
             setUndoStack((prev) => [...prev, newPath]); // Save to undo stack
             setCurrentRect(null); // Clear live preview
@@ -122,8 +145,9 @@ export default function Canvas() {
                 newPath = { type: "freehand", points, color }
             else if (mode === 1) // if in eraser mode, the color is white
                 newPath = { type: "freehand", points, color:"#ffffff" }
-            setDrawnPaths((prev) => [...prev, newPath]);
-            setUndoStack((prev) => [...prev, newPath]); // Save to undo stack
+            socket.emit('save', newPath) // to save it in others drawnPaths as well
+            setDrawnPaths((prev) => [...prev, newPath])
+            setUndoStack((prev) => [...prev, newPath]) // Save to undo stack
         }
 
         setIsDrawing(false);
@@ -148,7 +172,6 @@ export default function Canvas() {
         // Redraw canvas after undo
         setDrawnPaths((prev) => {
             const updatedPaths = prev.slice(0, prev.length - 1);
-            console.log(`Updated path: ${JSON.stringify(updatedPaths)}`)
             redrawCanvas(updatedPaths);
             return updatedPaths;
         });

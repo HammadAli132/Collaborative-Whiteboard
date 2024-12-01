@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
 import styles from "../../styles/homepage.module.css"
 import Message from "./Message"
 import { myContext } from "../../pages/Homepage"
@@ -14,8 +14,15 @@ function formatTime(timestamp) {
 }
 
 export default function ChatBox() {
+    const messagesEndRef = useRef()
     const messageRef = useRef()
     const {user, socket, messages, setMessages} = useContext(myContext)
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
 
     return (
         <div id={styles.chatArea}>
@@ -24,9 +31,10 @@ export default function ChatBox() {
                 <div id={styles.chats}>
                     {
                         messages.map((message, index) => {
-                            return <Message key={message} username={messages[index].username} text={messages[index].text} time={messages[index].time} />
+                            return <Message key={index} username={messages[index].username} text={messages[index].text} time={messages[index].time} />
                         })
                     }
+                    <div ref={messagesEndRef}></div>
                 </div>
                 <div id={styles.separator}></div>
                 <input type="text" ref={messageRef} name="message" id={styles.messageBox} placeholder="Your message..." onKeyDown={(e) => {

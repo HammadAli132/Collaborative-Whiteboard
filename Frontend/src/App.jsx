@@ -6,7 +6,7 @@ import io from "socket.io-client"
 import { useEffect, useState } from "react"
 import {toast, ToastContainer} from "react-toastify"
 
-const server = "http://localhost:5000"
+const server = import.meta.env.VITE_MODE === 'development' ?  "http://localhost:5000" : import.meta.env.VITE_SERVER_URL
 const connectionOptions = {
   "force new connection": true,
   reconnectionAttempts: "Infinity",

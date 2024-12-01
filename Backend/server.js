@@ -14,8 +14,6 @@ const io = new Server(server, {
     }
 })
 
-__dirname = path.resolve()
-
 const validRoomIDs = new Set(); // Maintain valid room IDs
 
 app.get('/', (req, res) => {
@@ -96,13 +94,6 @@ io.on('connection', (socket) => {
 })
 
 const PORT = process.env.PORT || 5000
-
-if (process.env.MODE !== 'development') {
-    app.use(express.static(path.join(__dirname, "../Frontend/dist")))
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"))
-    })
-}
 
 server.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`)

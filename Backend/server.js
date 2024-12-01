@@ -64,6 +64,11 @@ io.on('connection', (socket) => {
         addMessage(message)
         socket.to(message.roomID).emit('receive-message', getMessages(message.roomID))
     })
+
+    socket.on('get-all-messages', (roomID, callback) => {
+        const roomMessages = getMessages(roomID);
+        callback(roomMessages);
+    });
     
     socket.on('disconnect', () => {
         const user = getUser(socket.id)

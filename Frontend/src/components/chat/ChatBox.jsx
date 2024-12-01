@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useRef } from "react"
 import styles from "../../styles/homepage.module.css"
 import Message from "./Message"
 import { myContext } from "../../pages/Homepage"
@@ -15,15 +15,7 @@ function formatTime(timestamp) {
 
 export default function ChatBox() {
     const messageRef = useRef()
-    const [messages, setMessages] = useState([])
-    const {user, socket} = useContext(myContext)
-
-    useEffect(() => {
-        socket.on('receive-message', reply => {
-            console.log('Message received')
-            setMessages(reply)
-        })
-    }, [socket, setMessages])
+    const {user, socket, messages, setMessages} = useContext(myContext)
 
     return (
         <div id={styles.chatArea}>

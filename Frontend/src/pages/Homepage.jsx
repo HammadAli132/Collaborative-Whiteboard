@@ -14,6 +14,7 @@ export const myContext = createContext({
 export default function Homepage() {
     const [mode, setMode] = useState(0)
     const [color, setColor] = useState('#000000')
+    const [messages, setMessages] = useState([])
     const { user, socket } = useOutletContext()
     const navigate = useNavigate()
 
@@ -23,13 +24,27 @@ export default function Homepage() {
         }
     }, [user, navigate])
 
+    useEffect(() => {
+        socket.on('receive-message', reply => {
+            setMessages(reply)
+        })
+    }, [socket, setMessages])
+
+    useEffect(() => {
+        if (user) {
+            socket.emit('get-all-messages', user.roomID, (allMessages) => {
+                setMessages(allMessages);
+            });
+        }
+    }, [user, socket]);
+
     if (!user) {
         return null
     }
 
     return (
         <div id={styles.homepage}>
-            <myContext.Provider value={{mode, setMode, color, setColor, user, socket}}>
+            <myContext.Provider value={{mode, setMode, color, setColor, user, socket, messages, setMessages}}>
                 <Toolbar />
                 <Canvas />
                 <ChatBox />

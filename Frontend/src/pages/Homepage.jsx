@@ -3,29 +3,33 @@ import Toolbar from "../components/homepage/Toolbar";
 import styles from "../styles/homepage.module.css"
 import Canvas from "../components/homepage/Canvas";
 import ChatBox from "../components/chat/ChatBox";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 export const myContext = createContext({
     mode: 0,
-    color: '#000000'
+    color: '#000000',
+    messages: [],
 })
 
 export default function Homepage() {
     const [mode, setMode] = useState(0)
     const [color, setColor] = useState('#000000')
-    const { user } = useOutletContext()
-    let roomNotFound = false
+    const { user, socket } = useOutletContext()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!user) {
-            console.log("show 404 page")
-            roomNotFound = true
+            navigate('/404', {replace: true})
         }
-    }, [user])
+    }, [user, navigate])
+
+    if (!user) {
+        return null
+    }
 
     return (
         <div id={styles.homepage}>
-            <myContext.Provider value={{mode, setMode, color, setColor}}>
+            <myContext.Provider value={{mode, setMode, color, setColor, user, socket}}>
                 <Toolbar />
                 <Canvas />
                 <ChatBox />

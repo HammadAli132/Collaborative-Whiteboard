@@ -4,6 +4,7 @@ import Footer from "./components/Footer"
 import UsersSidebar from "./components/homepage/UsersSidebar"
 import io from "socket.io-client"
 import { useEffect, useState } from "react"
+import {toast, ToastContainer} from "react-toastify"
 
 const server = "http://localhost:5000"
 const connectionOptions = {
@@ -24,8 +25,7 @@ const App = () => {
     socket.on("user-has-joined", reply => {
       if (reply.success === true) {
         setUsers(reply.users)
-      }
-      else {
+      } else {
         setUser(null)
       }
     })
@@ -33,10 +33,19 @@ const App = () => {
     socket.on('new-user-logged-in', users => {
       setUsers(users)
     })
+
+    socket.on('user-login-message', reply => {toast.info(`${reply} has joined the room`)})
+
+    socket.on('user-logout-message', reply => {
+      toast.info(`${reply.username} has left the room`)
+      setUsers(reply.users)
+    })
+
   }, [])
 
   return (
     <div className={`root`}> 
+      <ToastContainer />
       <Header setSideBarIsVisible={setSideBarIsVisible} />
       <UsersSidebar sideBarIsVisible={sideBarIsVisible} setSideBarIsVisible={setSideBarIsVisible} users={users} user={user} />
       <main>

@@ -30,8 +30,8 @@ export default function JoinForm() {
                 username,
                 userID: generateID(),
             }
-            setUser(data)
             socket.emit("user-joined", data)
+            setUser(data)
             navigate('/homepage')
         }
     }

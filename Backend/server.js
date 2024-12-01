@@ -7,7 +7,11 @@ const { Server } = require("socket.io")
 
 const app = express()
 const server = http.createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+    cors: {
+        origin: process.env.MODE === 'development' ? 'http://localhost:3000' : process.env.SERVER_URL
+    }
+})
 
 const validRoomIDs = new Set(); // Maintain valid room IDs
 
@@ -88,6 +92,8 @@ io.on('connection', (socket) => {
 
 })
 
-server.listen(5000, () => {
-    console.log("Server started at http://localhost:5000")
+const PORT = process.env.PORT || 5000
+
+server.listen(PORT, () => {
+    console.log(`Server started at http://localhost:${PORT}`)
 })

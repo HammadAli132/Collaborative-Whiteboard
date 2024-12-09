@@ -13,6 +13,7 @@ const io = new Server(server, {
         origin: process.env.MODE === 'development' 
             ? 'http://localhost:3000' 
             : process.env.CLIENT_URL || 'https://collaborative-whiteboard-psi.vercel.app',
+        methods: ["GET", "POST"],
     }    
 })
 

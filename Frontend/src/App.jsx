@@ -10,7 +10,7 @@ const server = import.meta.env.VITE_MODE === 'development' ?  "http://localhost:
 const connectionOptions = {
   "force new connection": true,
   reconnectionAttempts: "Infinity",
-  timeout: 10000,
+  timeout: 10000, 
   transports: ["websocket"],
 }
 
